@@ -1,47 +1,47 @@
-import React from 'react'
+import React from "react";
 import { Alert, Button, Label, Spinner, TextInput } from "flowbite-react";
 import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
+import {
+  signInStart,
+  signFailure,
+  signSuccess,
+} from "../redux/user/userSlice.js";
+import { useDispatch, useSelector } from "react-redux";
 
 export default function Signin() {
+  const dispatch = useDispatch();
   const navigate = useNavigate();
   const [formData, setFormData] = useState({});
-  const [errorMessage, setErrorMessage] = useState(null);
-  const [loading, setLoading] = useState(false);
+  const { loading, error: errorMessage } = useSelector((state) => state.user);
   const handleChange = (e) => {
-    //console.log(e.target.id, e.target.value);
     setFormData({ ...formData, [e.target.id]: e.target.value.trim() });
   };
   const handleSubmit = async (e) => {
     e.preventDefault();
-    //console.log(formData);
     if (!formData.username || !formData.password) {
-      return setErrorMessage("Fill all the fields. ");
+      return dispatch(signFailure('Please fill all the fields '));
     }
     try {
-      setLoading(true);
-      setErrorMessage(null);
-      const res = await fetch("api/auth/signin", {
+      dispatch(signInStart());
+      const res = await fetch("/api/auth/signin", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(formData),
       });
       const data = await res.json();
-      //console.log(data);
       if (data.success == false) {
-        setLoading(false);
-        return setErrorMessage(data.message);
+        return dispatch(signFailure(data.message));
       }
-      setLoading(false);
-      if(res.ok){
-        navigate('/');
+      if (res.ok) {
+        dispatch(signSuccess(data));
+        navigate("/");
       }
     } catch (error) {
-      console.error(error);
-      setErrorMessage(error.message);
-      setLoading(false);
+      dispatch(signFailure(error.message));
     }
   };
+  console.log(errorMessage);
   return (
     <div className="min-h-[66vh] w-full flex items-center justify-center">
       <div className="flex p-3 max-w-3xl mx-auto flex-col md:flex-row md:items-center gap-5 ">
@@ -87,7 +87,7 @@ export default function Signin() {
             >
               {loading ? (
                 <>
-                  <Spinner size='sm' />
+                  <Spinner size="sm" />
                   <span className="pl-3">Loading...</span>
                 </>
               ) : (
