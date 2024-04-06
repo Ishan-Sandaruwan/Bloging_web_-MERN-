@@ -23,7 +23,10 @@ export const updateUser = async (req, res, next) => {
       );
     }
   }
-  req.body.password = bcryptjs.hashSync(req.body.password, 10);
+  if (req.body.password) {
+    req.body.password = bcryptjs.hashSync(req.body.password, 10);
+  }
+
   try {
     const updatedUser = await User.findByIdAndUpdate(
       req.params.userId,

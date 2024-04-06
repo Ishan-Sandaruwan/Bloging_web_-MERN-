@@ -88,6 +88,7 @@ export default function DashProfile() {
     try {
       dispatch(updateStart());
       const res = await fetch(`/api/user/update/${currentUser._id}`, {
+        method: 'PUT',
         headers: {
           "Content-Type": "application/json",
         },
@@ -184,7 +185,7 @@ export default function DashProfile() {
       </div>
       {updateUserSuccess && (
         <Alert color="success" className="mt-5">
-          {updateSuccess}
+          {updateUserSuccess}
         </Alert>
       )}
       {updateUserError && (
