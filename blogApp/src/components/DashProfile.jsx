@@ -1,6 +1,6 @@
 import React, { useEffect, useRef, useState } from "react";
 import { useSelector } from "react-redux";
-import { Alert, Button, TextInput } from "flowbite-react";
+import { Alert, Button, Modal, TextInput } from "flowbite-react";
 import {
   getDownloadURL,
   getStorage,
@@ -14,8 +14,12 @@ import {
   updateStart,
   updateSuccess,
   updateFailure,
+  deleteStart,
+  deleteSuccess,
+  deleteFailure,
 } from "../redux/user/userSlice.js";
 import { useDispatch } from "react-redux";
+import { HiOutlineExclamationCircle } from "react-icons/hi";
 
 export default function DashProfile() {
   const { currentUser, error, loading } = useSelector((state) => state.user);
@@ -28,6 +32,7 @@ export default function DashProfile() {
   const dispatch = useDispatch();
   const [updateUserSuccess, setUpdateUserSuccess] = useState(null);
   const [updateUserError, setUpdateUserError] = useState(null);
+  const [showModel, setShowModel] = useState(false);
 
   const handleImageChange = (e) => {
     const file = e.target.files[0];
@@ -88,7 +93,7 @@ export default function DashProfile() {
     try {
       dispatch(updateStart());
       const res = await fetch(`/api/user/update/${currentUser._id}`, {
-        method: 'PUT',
+        method: "PUT",
         headers: {
           "Content-Type": "application/json",
         },
@@ -105,6 +110,25 @@ export default function DashProfile() {
     } catch (error) {
       dispatch(updateFailure(error.message));
       setUpdateUserError(error.message);
+    }
+  };
+
+  const handleDeleteUser = async () => {
+    setShowModel(false);
+    try {
+      dispatch(deleteStart());
+      const res = await fetch(`/api/user/delete/${currentUser._id}`, {
+        method: "DELETE",
+      });
+      const data = await res.json();
+      if(!res.ok){
+        dispatch(deleteFailure(data.message));
+      }else{
+        dispatch(deleteSuccess());
+      }
+    } catch (error) {
+      console.log(error.message);
+      dispatch(deleteFailure(error.message));
     }
   };
 
@@ -180,7 +204,9 @@ export default function DashProfile() {
         </Button>
       </form>
       <div className="text-red-500 flex justify-between mt-5">
-        <span className="cursor-pointer">Delete account</span>
+        <span className="cursor-pointer" onClick={() => setShowModel(true)}>
+          Delete account
+        </span>
         <span className="cursor-pointer">Sign out</span>
       </div>
       {updateUserSuccess && (
@@ -192,7 +218,36 @@ export default function DashProfile() {
         <Alert color="failure" className="mt-5">
           {updateUserError}
         </Alert>
+      )}{error && (
+        <Alert color="failure" className="mt-5">
+          {error}
+        </Alert>
       )}
+
+      <Modal
+        show={showModel}
+        onClose={() => setShowModel(false)}
+        popup
+        size="md"
+      >
+        <Modal.Header />
+        <Modal.Body>
+          <div className="text-center">
+            <HiOutlineExclamationCircle className="h-14 w-14 text-gray-400 md-4 mx-auto" />
+            <h3 className="text-gray-500 mb-5 text-lg">
+              Are you sure you want to delete your account
+            </h3>
+            <div className="flex justify-center gap-8">
+              <Button color="failure" onClick={handleDeleteUser}>
+                Yes, I'm sure
+              </Button>
+              <Button color="gray" onClick={() => setShowModel(false)}>
+                No, Cansel
+              </Button>
+            </div>
+          </div>
+        </Modal.Body>
+      </Modal>
     </div>
   );
 }
