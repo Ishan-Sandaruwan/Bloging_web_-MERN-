@@ -120,14 +120,20 @@ export default function DashProfile() {
       const res = await fetch(`/api/user/delete/${currentUser._id}`, {
         method: "DELETE",
       });
-      const data = await res.json();
-      if(!res.ok){
-        dispatch(deleteFailure(data.message));
-      }else{
+
+      if (!res.ok) {
+        // If the request fails, extract the error message from the response
+        const errorMessage = await res.text();
+        dispatch(deleteFailure(errorMessage));
+        console.log("Error message:", errorMessage);
+      } else {
+        // If the request is successful, dispatch the success action
         dispatch(deleteSuccess());
+        console.log("User deleted successfully");
       }
     } catch (error) {
-      console.log(error.message);
+      // Handle network errors or other exceptions
+      console.error("Error deleting user:", error);
       dispatch(deleteFailure(error.message));
     }
   };
@@ -218,7 +224,8 @@ export default function DashProfile() {
         <Alert color="failure" className="mt-5">
           {updateUserError}
         </Alert>
-      )}{error && (
+      )}
+      {error && (
         <Alert color="failure" className="mt-5">
           {error}
         </Alert>
