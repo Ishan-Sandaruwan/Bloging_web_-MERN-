@@ -17,10 +17,11 @@ import {
   deleteStart,
   deleteSuccess,
   deleteFailure,
-  signoutSuccess
+  signoutSuccess,
 } from "../redux/user/userSlice.js";
 import { useDispatch } from "react-redux";
 import { HiOutlineExclamationCircle } from "react-icons/hi";
+import {Link} from 'react-router-dom';
 
 export default function DashProfile() {
   const { currentUser, error, loading } = useSelector((state) => state.user);
@@ -143,9 +144,9 @@ export default function DashProfile() {
     try {
       const res = await fetch("/api/user/signout", { method: "POST" });
       const data = await res.json();
-      if(!res.ok){
+      if (!res.ok) {
         console.log(data.message);
-      }else{
+      } else {
         dispatch(signoutSuccess());
       }
     } catch (error) {
@@ -223,6 +224,18 @@ export default function DashProfile() {
         <Button type="submit" outline gradientDuoTone="purpleToBlue">
           Update
         </Button>
+        {currentUser.isAdmin && (
+          <Link to={'create-post'}>
+            <Button
+              type="button"
+              gradientDuoTone="purpleToPink"
+              outline
+              className="w-full"
+            >
+              Create a Post
+            </Button>
+          </Link>
+        )}
       </form>
       <div className="text-red-500 flex justify-between mt-5">
         <span className="cursor-pointer" onClick={() => setShowModel(true)}>
