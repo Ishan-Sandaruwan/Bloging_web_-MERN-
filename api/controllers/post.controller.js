@@ -33,9 +33,9 @@ export const getposts = async (req, res, next) => {
     const sortDirection = req.query.order === "asc" ? 1 : -1;
     const posts = await Post.find({
       ...(req.query.userId && { userId: req.query.userId }),
-      ...(req.query.category && { userId: req.query.category }),
-      ...(req.query.slug && { userId: req.query.slug }),
-      ...(req.query.postId && { userId: req.query.postId }),
+      ...(req.query.category && { category: req.query.category }),
+      ...(req.query.slug && { slug: req.query.slug }),
+      ...(req.query.postId && { _id: req.query.postId }),
       ...(req.query.searchTerm && {
         $or: [
           { title: { $regex: req.query.searchTerm, $options: "i" } },
@@ -64,7 +64,7 @@ export const getposts = async (req, res, next) => {
       totalPosts,
       lastMonthPosts,
     });
-    
+
   } catch (error) {
     next(error);
   }
