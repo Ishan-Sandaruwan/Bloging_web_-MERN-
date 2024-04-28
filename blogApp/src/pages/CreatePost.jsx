@@ -4,24 +4,28 @@ import {
   ref,
   uploadBytesResumable,
 } from "firebase/storage";
-import { Button, FileInput, Select, TextInput } from "flowbite-react";
+import { Alert, Button, FileInput, Select, TextInput } from "flowbite-react";
 import React, { useState } from "react";
 import ReactQuill from "react-quill";
 import "react-quill/dist/quill.snow.css";
 import { app } from "../firebase/firebase";
 import { CircularProgressbar } from "react-circular-progressbar";
 import "react-circular-progressbar/dist/styles.css";
+import { useNavigate } from "react-router-dom";
 
 function CreatePost() {
+
   const [file, setFile] = useState(null);
   const [formData, setFormData] = useState({});
+  const [publishError, setPublidhError] = useState(null);
   const [imageUploadingProgress, setImageUploadingProgress] = useState(null);
+  const navigate = useNavigate();
 
   const handleInputChange = (e) => {
     setFormData({ ...formData, [e.target.id]: e.target.value });
   };
 
-  const handleImageUpload = () => {
+  const handleImageUpload = async () => {
     try {
       if (!file) {
         return;
@@ -56,11 +60,32 @@ function CreatePost() {
       console.log(error);
     }
   };
-  console.log(formData);
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    try {
+      const res = await fetch("/api/post/create", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(formData),
+      });
+      const data = await res.json();
+      if (!res.ok) {
+        return setPublidhError(data.message);
+      } else {
+        setPublidhError(null);
+        navigate(`/post/${data.slug}`);
+      }
+    } catch (error) {
+      setPublidhError("something went wrong");
+    }
+  };
   return (
     <div className="p-3 max-w-3xl mx-auto min-h-screen">
       <h1 className="text-center text-3xl my-7 font-semibold">Create a post</h1>
-      <form action="" className="flex flex-col gap-4">
+      <form action="" className="flex flex-col gap-4" onSubmit={handleSubmit}>
         <div className="flex flex-col gap-4 sm:flex-row justify-between">
           <TextInput
             type="text"
@@ -103,17 +128,25 @@ function CreatePost() {
             )}
           </Button>
         </div>
-        {formData.image && <img src={formData.image} alt="image" className="w-full h-72 object-cover" />}
+        {formData.image && (
+          <img
+            src={formData.image}
+            alt="image"
+            className="w-full h-72 object-cover"
+          />
+        )}
         <ReactQuill
           theme="snow"
           placeholder="write something..."
           className="h-72 mb-12"
-          id="content"
-          onChange={handleInputChange}
+          onChange={(value) => {
+            setFormData({ ...formData, content: value });
+          }}
         />
         <Button type="submit" gradientDuoTone="purpleToPink">
           Publish
         </Button>
+        {publishError && <Alert color="failure" className="my-2">{publishError}</Alert>}
       </form>
     </div>
   );
