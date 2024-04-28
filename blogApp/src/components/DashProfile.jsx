@@ -48,7 +48,6 @@ export default function DashProfile() {
       uploadImage();
     }
   }, [imageFile]);
-
   const uploadImage = async () => {
     const storage = getStorage(app);
     const fileName = new Date().getTime() + imageFile.name;
@@ -114,7 +113,6 @@ export default function DashProfile() {
       setUpdateUserError(error.message);
     }
   };
-
   const handleDeleteUser = async () => {
     setShowModel(false);
     try {
@@ -139,7 +137,6 @@ export default function DashProfile() {
       dispatch(deleteFailure(error.message));
     }
   };
-
   const handleSignOut = async () => {
     try {
       const res = await fetch("/api/user/signout", { method: "POST" });

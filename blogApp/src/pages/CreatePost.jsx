@@ -76,7 +76,7 @@ function CreatePost() {
         return setPublidhError(data.message);
       } else {
         setPublidhError(null);
-        navigate(`/post/${data.slug}`);
+        navigate(`/posts/${data.slug}`);
       }
     } catch (error) {
       setPublidhError("something went wrong");
