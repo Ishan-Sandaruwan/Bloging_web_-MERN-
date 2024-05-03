@@ -51,11 +51,26 @@ export const deleteUser = async (req, res, next) => {
   if (req.user.id != req.params.userId) {
     return next(errorHandler(403, "You are not allowed to delete this user"));
   }
-  try {
-    await User.findByIdAndDelete(req.params.userId);
-    res.status(200).json("User has been deleted");
-  } catch (error) {
-    next(error);
+  const userToDelete = req.query.delete;
+  if (userToDelete) {
+    if (!req.user.isAdmin) {
+      return next(
+        errorHandler(403, "You are not allowed to delete this account ")
+      );
+    }
+    try {
+      await User.findByIdAndDelete(userToDelete);
+      res.status(200).json("account has been deleted");
+    } catch (error) {
+      next(error);
+    }
+  } else {
+    try {
+      await User.findByIdAndDelete(req.params.userId);
+      res.status(200).json("User has been deleted");
+    } catch (error) {
+      next(error);
+    }
   }
 };
 
@@ -67,9 +82,9 @@ export const signout = async (req, res, next) => {
   }
 };
 
-export const getUsers = async (req,res,next)=>{
-  if(!req.user.isAdmin){
-    return next(errorHandler(403,'you are not allowed to see all users'));
+export const getUsers = async (req, res, next) => {
+  if (!req.user.isAdmin) {
+    return next(errorHandler(403, "you are not allowed to see all users"));
   }
   try {
     const startIndex = parseInt(req.query.startIndex) || 0;
@@ -81,8 +96,8 @@ export const getUsers = async (req,res,next)=>{
       .skip(startIndex)
       .limit(limit);
 
-    const usersWithoutPassword = users.map((user)=>{
-      const {password,...rest} = user._doc;
+    const usersWithoutPassword = users.map((user) => {
+      const { password, ...rest } = user._doc;
       return rest;
     });
 
@@ -106,4 +121,4 @@ export const getUsers = async (req,res,next)=>{
   } catch (error) {
     next(error);
   }
-}
+};

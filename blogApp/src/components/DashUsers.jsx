@@ -51,7 +51,7 @@ export default function DashUsers() {
     setShowModel(false);
     try {
       const res = await fetch(
-        `/api/user/deleteu ser/${userIdToDelete}/${currentUser._id}`,
+        `/api/user/delete/${currentUser._id}?delete=${userIdToDelete}`,
         {
           method: "DELETE",
         }
@@ -60,7 +60,7 @@ export default function DashUsers() {
       if (!res.ok) {
         console.log(data.message);
       } else {
-        setUsers((prev) => prev.filter((post) => post._id !== postIdToDelete));
+        setUsers((prev) => prev.filter((user) => user._id !== userIdToDelete));
       }
     } catch (error) {
       console.log(error);
