@@ -52,7 +52,7 @@ export const getposts = async (req, res, next) => {
     const now = new Date();
     const oneMonthAgo = new Date(
       now.getFullYear(),
-      now.getMonth(),
+      now.getMonth() - 1,
       now.getDate()
     );
     const lastMonthPosts = await Post.countDocuments({
